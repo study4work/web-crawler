@@ -1,10 +1,12 @@
+package connection;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-public class Connect implements ConnectionToUrl {
+public class ConnectioToUrlImpl implements ConnectionToUrl {
 
     @Override
     public Document connectionToUrl(String url) {

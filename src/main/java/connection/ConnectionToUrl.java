@@ -1,3 +1,5 @@
+package connection;
+
 import org.jsoup.nodes.Document;
 
 public interface ConnectionToUrl {

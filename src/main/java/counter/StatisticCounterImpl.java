@@ -1,9 +1,11 @@
+package counter;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.List;
 
-public class Counter implements StatisticCounter {
+public class StatisticCounterImpl implements StatisticCounter {
 
     @Override
     public int[] countMatchingWords(List<String> wordToFind, Document documentToRead) {

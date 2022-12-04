@@ -1,21 +1,35 @@
+package hrefCounter;
+
+import connection.ConnectionToUrl;
+import connection.ConnectioToUrlImpl;
+import counter.StatisticCounter;
+import counter.StatisticCounterImpl;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import writting.Write;
+import writting.WriteImpl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Storage implements HrefCounter {
+public class HrefCounterImpl implements HrefCounter {
 
     private final List<String> usingHref = new ArrayList<>();
     private final List<String> result = new ArrayList<>();
-    private final Connect connect = new Connect();
-    private final Counter counter = new Counter();
+    private final ConnectionToUrl connectioToUrlImpl = new ConnectioToUrlImpl();
+    private final StatisticCounter statisticCounterImpl = new StatisticCounterImpl();
+    private final Write write = new WriteImpl();
     private int[] globalCount;
+
+    public int[] getGlobalCount() {
+        return globalCount;
+    }
     /*
-        Find all links from current URL and write them
-        to List<String> href;
-         */
+            Find all links from current URL and write them
+            to List<String> href;
+             */
     @Override
     public List<String> allLinksOnCurrentUrl(Document documentToRead) {
         List<String> hrefList = new ArrayList<>();
@@ -33,9 +47,15 @@ public class Storage implements HrefCounter {
     Write them to the int globalCount.
      */
     @Override
-    public void countStartPage(String url, List<String> wordToFind) {
-        globalCount = counter.countMatchingWords(wordToFind, connect.connectionToUrl(url));
-        System.out.println("For link: " + url + " " + "matches SQL " + globalCount);
+    public void countStartPage(String url, List<String> wordToFind) throws IOException {
+        globalCount = statisticCounterImpl.countMatchingWords(wordToFind, connectioToUrlImpl.connectionToUrl(url));
+        write.writToCSV(globalCount, wordToFind, url);
+
+        //unnessesary code for showing in console
+        System.out.println("For link: " + url + " " + "matches SQL ");
+        for (int i=0; i<globalCount.length; i++) {
+            System.out.println(globalCount[i]);
+        }
     }
 
     /*
@@ -46,18 +66,20 @@ public class Storage implements HrefCounter {
     After we taking recursive call for given numbers of jump into the links.
      */
     @Override
-    public List<String> deepLinksCrawl(List<String> newLinks, List<String> wordToFind, int count) {
+    public List<String> deepLinksCrawl(List<String> newLinks, List<String> wordToFind, int count) throws IOException {
         int a = (int) (1 + Math.random() * (newLinks.size() - 1));
         String url = newLinks.get(a);
         usingHref.add(url);
-        addingToGlobalCount(counter.countMatchingWords(wordToFind, connect.connectionToUrl(url)));
+//      addingToGlobalCount(statisticCounterImpl.countMatchingWords(wordToFind, connectioToUrlImpl.connectionToUrl(url)));
+        globalCount = statisticCounterImpl.countMatchingWords(wordToFind, connectioToUrlImpl.connectionToUrl(url));
+        write.writToCSV(globalCount, wordToFind, url);
         //unnessesary code for showing in console
         System.out.println("For link: " + url + " " + "matches: ");
-        for(int i=0; i<globalCount.length; i++) {
+        for (int i=0; i<globalCount.length; i++) {
             System.out.println(globalCount[i]);
         }
 
-        result.addAll(allLinksOnCurrentUrl(connect.connectionToUrl(url)));
+        result.addAll(allLinksOnCurrentUrl(connectioToUrlImpl.connectionToUrl(url)));
         result.removeAll(usingHref);
         count--;
         if (count != 0) {
@@ -67,7 +89,7 @@ public class Storage implements HrefCounter {
     }
 
     /*
-    method for
+    method for add sum numbers to globalCount array
      */
     public void addingToGlobalCount(int[] counters) {
         for (int i = 0; i < counters.length; i++) {
